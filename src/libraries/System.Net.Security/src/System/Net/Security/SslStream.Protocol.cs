@@ -170,7 +170,7 @@ namespace System.Net.Security
             _securityContext?.Dispose();
             _credentialsHandle?.Dispose();
 
-#if TARGET_ANDROID
+#if TARGET_ANDROID || TARGET_WASI
             _sslAuthenticationOptions.SslStreamProxy?.Dispose();
 #endif
         }

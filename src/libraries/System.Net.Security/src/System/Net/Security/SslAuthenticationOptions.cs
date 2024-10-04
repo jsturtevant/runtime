@@ -189,5 +189,8 @@ namespace System.Net.Security
 #if TARGET_ANDROID
         internal SslStream.JavaProxy? SslStreamProxy { get; set; }
 #endif
+#if TARGET_WASI
+        internal SslStream.WasiProxy? SslStreamProxy { get; set; }
+#endif
     }
 }

@@ -1,0 +1,74 @@
+package wasi:sockets@0.2.1;
+
+interface tls {
+  use wasi:io/streams@0.2.1.{input-stream, output-stream};
+  use wasi:io/poll@0.2.1.{pollable};
+
+  resource client-connection {
+    constructor(input: input-stream, output: output-stream);
+    connect: func(server-name: string) -> result<client-handshake>;
+  }
+
+  resource client-handshake {
+    finish: static func(this: client-handshake) -> future-streams;
+  }
+
+  resource future-streams {
+    subscribe: func() -> pollable;
+    get: func() -> option<result<result<tuple<input-stream, output-stream>>>>;
+  }
+
+  make-pipe: func() -> tuple<input-stream, output-stream>;
+}
+
+world wasi-tls {
+  import wasi:io/error@0.2.1;
+  import wasi:io/poll@0.2.1;
+  import wasi:io/streams@0.2.1;
+  import tls;
+}
+package wasi:io@0.2.1 {
+  interface error {
+    resource error {
+      to-debug-string: func() -> string;
+    }
+  }
+  interface poll {
+    resource pollable {
+      ready: func() -> bool;
+      block: func();
+    }
+
+    poll: func(in: list<borrow<pollable>>) -> list<u32>;
+  }
+  interface streams {
+    use error.{error};
+    use poll.{pollable};
+
+    variant stream-error {
+      last-operation-failed(error),
+      closed,
+    }
+
+    resource input-stream {
+      read: func(len: u64) -> result<list<u8>, stream-error>;
+      blocking-read: func(len: u64) -> result<list<u8>, stream-error>;
+      skip: func(len: u64) -> result<u64, stream-error>;
+      blocking-skip: func(len: u64) -> result<u64, stream-error>;
+      subscribe: func() -> pollable;
+    }
+
+    resource output-stream {
+      check-write: func() -> result<u64, stream-error>;
+      write: func(contents: list<u8>) -> result<_, stream-error>;
+      blocking-write-and-flush: func(contents: list<u8>) -> result<_, stream-error>;
+      flush: func() -> result<_, stream-error>;
+      blocking-flush: func() -> result<_, stream-error>;
+      subscribe: func() -> pollable;
+      write-zeroes: func(len: u64) -> result<_, stream-error>;
+      blocking-write-zeroes-and-flush: func(len: u64) -> result<_, stream-error>;
+      splice: func(src: borrow<input-stream>, len: u64) -> result<u64, stream-error>;
+      blocking-splice: func(src: borrow<input-stream>, len: u64) -> result<u64, stream-error>;
+    }
+  }
+}
