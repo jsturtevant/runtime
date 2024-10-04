@@ -205,6 +205,7 @@ namespace System.Net.Security
             LocalCertificateSelectionCallback? userCertificateSelectionCallback, EncryptionPolicy encryptionPolicy)
             : base(innerStream, leaveInnerStreamOpen)
         {
+            System.Console.WriteLine("SslStream Start Ctor");
 #pragma warning disable SYSLIB0040 // NoEncryption and AllowNoEncryption are obsolete
             if (encryptionPolicy != EncryptionPolicy.RequireEncryption && encryptionPolicy != EncryptionPolicy.AllowNoEncryption && encryptionPolicy != EncryptionPolicy.NoEncryption)
             {
@@ -219,8 +220,12 @@ namespace System.Net.Security
 #if TARGET_ANDROID
             _sslAuthenticationOptions.SslStreamProxy = new SslStream.JavaProxy(sslStream: this);
 #endif
+#if TARGET_WASI
+            _sslAuthenticationOptions.SslStreamProxy = new SslStream.WasiProxy(stream: innerStream);
+#endif
 
             if (NetEventSource.Log.IsEnabled()) NetEventSource.Log.SslStreamCtor(this, innerStream);
+            System.Console.WriteLine("SslStream end Ctor");
         }
 
         //
