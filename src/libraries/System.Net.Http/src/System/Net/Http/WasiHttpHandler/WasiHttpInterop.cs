@@ -11,10 +11,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WasiHttpWorld;
-using WasiHttpWorld.wit.imports.wasi.http.v0_2_0;
-using WasiHttpWorld.wit.imports.wasi.io.v0_2_0;
-using static WasiHttpWorld.wit.imports.wasi.http.v0_2_0.ITypes;
-using static WasiHttpWorld.wit.imports.wasi.io.v0_2_0.IStreams;
+using WasiHttpWorld.wit.imports.wasi.http.v0_2_1;
+using WasiHttpWorld.wit.imports.wasi.io.v0_2_1;
+using static WasiHttpWorld.wit.imports.wasi.http.v0_2_1.ITypes;
+using static WasiHttpWorld.wit.imports.wasi.io.v0_2_1.IStreams;
 
 namespace System.Net.Http
 {
