@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1;
+namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0;
 
 internal interface ITls {
 
@@ -28,7 +28,7 @@ internal interface ITls {
             Dispose(true);
         }
 
-        [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[resource-drop]client-connection"), WasmImportLinkage]
+        [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[resource-drop]client-connection"), WasmImportLinkage]
         private static extern void wasmImportResourceDrop(int p0);
 
         protected virtual void Dispose(bool disposing) {
@@ -40,12 +40,12 @@ internal interface ITls {
 
         internal static class ConstructorWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[constructor]client-connection"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[constructor]client-connection"), WasmImportLinkage]
             internal static extern int wasmImportConstructor(int p0, int p1);
 
         }
 
-        internal   unsafe  ClientConnection(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream input, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream output)
+        internal   unsafe  ClientConnection(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream input, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream output)
         {
             var handle = input.Handle;
             input.Handle = 0;
@@ -59,12 +59,12 @@ internal interface ITls {
 
         internal static class ConnectWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[method]client-connection.connect"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.connect"), WasmImportLinkage]
             internal static extern void wasmImportConnect(int p0, nint p1, int p2, nint p3);
 
         }
 
-        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake Connect(string serverName)
+        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake Connect(string serverName)
         {
             var handle = this.Handle;
 
@@ -77,18 +77,18 @@ internal interface ITls {
                 var ptr = (nint)retAreaByte0;
                 ConnectWasmInterop.wasmImportConnect(handle, interopString.ToInt32(), lengthresult, ptr);
 
-                Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake, None> lifted;
+                Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake, None> lifted;
 
                 switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
                     case 0: {
-                        var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
+                        var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
 
-                        lifted = Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake, None>.ok(resource);
+                        lifted = Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake, None>.ok(resource);
                         break;
                     }
                     case 1: {
 
-                        lifted = Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake, None>.err(new global::WasiTlsWorld.None());
+                        lifted = Result<global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake, None>.err(new global::WasiTlsWorld.None());
                         break;
                     }
 
@@ -120,7 +120,7 @@ internal interface ITls {
             Dispose(true);
         }
 
-        [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[resource-drop]client-handshake"), WasmImportLinkage]
+        [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[resource-drop]client-handshake"), WasmImportLinkage]
         private static extern void wasmImportResourceDrop(int p0);
 
         protected virtual void Dispose(bool disposing) {
@@ -132,17 +132,17 @@ internal interface ITls {
 
         internal static class FinishWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[static]client-handshake.finish"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[static]client-handshake.finish"), WasmImportLinkage]
             internal static extern int wasmImportFinish(int p0);
 
         }
 
-        internal  static unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.FutureStreams Finish(global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.ClientHandshake @this)
+        internal  static unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.FutureStreams Finish(global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.ClientHandshake @this)
         {
             var handle = @this.Handle;
             @this.Handle = 0;
             var result =  FinishWasmInterop.wasmImportFinish(handle);
-            var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.FutureStreams(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.FutureStreams.THandle(result));
+            var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.FutureStreams(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.FutureStreams.THandle(result));
             return resource;
 
             //TODO: free alloc handle (interopString) if exists
@@ -163,7 +163,7 @@ internal interface ITls {
             Dispose(true);
         }
 
-        [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[resource-drop]future-streams"), WasmImportLinkage]
+        [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[resource-drop]future-streams"), WasmImportLinkage]
         private static extern void wasmImportResourceDrop(int p0);
 
         protected virtual void Dispose(bool disposing) {
@@ -175,16 +175,16 @@ internal interface ITls {
 
         internal static class SubscribeWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[method]future-streams.subscribe"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]future-streams.subscribe"), WasmImportLinkage]
             internal static extern int wasmImportSubscribe(int p0);
 
         }
 
-        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IPoll.Pollable Subscribe()
+        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IPoll.Pollable Subscribe()
         {
             var handle = this.Handle;
             var result =  SubscribeWasmInterop.wasmImportSubscribe(handle);
-            var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IPoll.Pollable(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IPoll.Pollable.THandle(result));
+            var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IPoll.Pollable(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IPoll.Pollable.THandle(result));
             return resource;
 
             //TODO: free alloc handle (interopString) if exists
@@ -192,12 +192,12 @@ internal interface ITls {
 
         internal static class GetWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "[method]future-streams.get"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]future-streams.get"), WasmImportLinkage]
             internal static extern void wasmImportGet(int p0, nint p1);
 
         }
 
-        internal   unsafe Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>, None>? Get()
+        internal   unsafe Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>, None>? Get()
         {
             var handle = this.Handle;
 
@@ -207,7 +207,7 @@ internal interface ITls {
                 var ptr = (nint)retAreaByte0;
                 GetWasmInterop.wasmImportGet(handle, ptr);
 
-                Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>, None>? lifted12;
+                Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>, None>? lifted12;
 
                 switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
                     case 0: {
@@ -217,37 +217,37 @@ internal interface ITls {
 
                     case 1: {
 
-                        Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>, None> lifted11;
+                        Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>, None> lifted11;
 
                         switch (new Span<byte>((void*)(ptr + 4), 1)[0]) {
                             case 0: {
 
-                                Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None> lifted;
+                                Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None> lifted;
 
                                 switch (new Span<byte>((void*)(ptr + 8), 1)[0]) {
                                     case 0: {
-                                        var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 12), 4))));
-                                        var resource6 = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 16), 4))));
+                                        var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 12), 4))));
+                                        var resource6 = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 16), 4))));
 
-                                        lifted = Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>.ok((resource, resource6
+                                        lifted = Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>.ok((resource, resource6
                                         ));
                                         break;
                                     }
                                     case 1: {
 
-                                        lifted = Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>.err(new global::WasiTlsWorld.None());
+                                        lifted = Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>.err(new global::WasiTlsWorld.None());
                                         break;
                                     }
 
                                     default: throw new ArgumentException($"invalid discriminant: {new Span<byte>((void*)(ptr + 8), 1)[0]}");
                                 }
 
-                                lifted11 = Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>, None>.ok(lifted);
+                                lifted11 = Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>, None>.ok(lifted);
                                 break;
                             }
                             case 1: {
 
-                                lifted11 = Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream), None>, None>.err(new global::WasiTlsWorld.None());
+                                lifted11 = Result<Result<(global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream), None>, None>.err(new global::WasiTlsWorld.None());
                                 break;
                             }
 
