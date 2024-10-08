@@ -363,6 +363,7 @@
       otherwise it will be included in the dotnet.wasm and required -S http argument to wasmtime
       -->
       <_WasiLinkStepArgs Include="-Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(MicrosoftNetCoreAppRuntimePackRidNativeDir)', 'WasiHttpWorld_component_type.wit').Replace('\','/'))&quot;"/>
+      <_WasiLinkStepArgs Include="-Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(MicrosoftNetCoreAppRuntimePackRidNativeDir)', 'WasiTlsWorld_component_type.wit').Replace('\','/'))&quot;"/>
       <_WasiLinkStepArgs Include="-Wl,-s" Condition="'$(WasmNativeStrip)' == 'true'"/>
 
       <_WasiLinkStepArgs Include="&quot;@$(_WasmDefaultLinkFlagsRsp.Replace('\', '/'))&quot;" />

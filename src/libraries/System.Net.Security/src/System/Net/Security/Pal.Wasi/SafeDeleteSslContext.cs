@@ -8,8 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using WasiTlsWorld;
-using WasiTlsWorld.wit.imports.wasi.io.v0_2_1;
-using WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1;
+using WasiTlsWorld.wit.imports.wasi.io.v0_2_0;
+using WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0;
 
 
 namespace System.Net

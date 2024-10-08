@@ -11,18 +11,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1
+namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0
 {
     internal static class TlsInterop {
 
         internal static class MakePipeWasmInterop
         {
-            [DllImport("wasi:sockets/tls@0.2.1", EntryPoint = "make-pipe"), WasmImportLinkage]
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "make-pipe"), WasmImportLinkage]
             internal static extern void wasmImportMakePipe(nint p0);
 
         }
 
-        internal  static unsafe (global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream) MakePipe()
+        internal  static unsafe (global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream, global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream) MakePipe()
         {
 
             var retArea = new uint[2];
@@ -30,8 +30,8 @@ namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1
             {
                 var ptr = (nint)retAreaByte0;
                 MakePipeWasmInterop.wasmImportMakePipe(ptr);
-                var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.InputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 0), 4))));
-                var resource0 = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.OutputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
+                var resource = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.InputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 0), 4))));
+                var resource0 = new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream(new global::WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.OutputStream.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
                 return (resource, resource0
                 );
             }

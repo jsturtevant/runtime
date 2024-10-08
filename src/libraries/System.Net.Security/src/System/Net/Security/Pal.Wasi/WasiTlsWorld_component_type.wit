@@ -1,8 +1,8 @@
-package wasi:sockets@0.2.1;
+package wasi:sockets@0.2.0;
 
 interface tls {
-  use wasi:io/streams@0.2.1.{input-stream, output-stream};
-  use wasi:io/poll@0.2.1.{pollable};
+  use wasi:io/streams@0.2.0.{input-stream, output-stream};
+  use wasi:io/poll@0.2.0.{pollable};
 
   resource client-connection {
     constructor(input: input-stream, output: output-stream);
@@ -22,12 +22,12 @@ interface tls {
 }
 
 world wasi-tls {
-  import wasi:io/error@0.2.1;
-  import wasi:io/poll@0.2.1;
-  import wasi:io/streams@0.2.1;
+  import wasi:io/error@0.2.0;
+  import wasi:io/poll@0.2.0;
+  import wasi:io/streams@0.2.0;
   import tls;
 }
-package wasi:io@0.2.1 {
+package wasi:io@0.2.0 {
   interface error {
     resource error {
       to-debug-string: func() -> string;

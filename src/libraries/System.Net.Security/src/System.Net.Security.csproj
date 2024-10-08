@@ -424,14 +424,14 @@
     <Compile Include="System\Net\Security\SslStreamPal.Wasi.cs" />
     <Compile Include="System\Net\Security\Pal.Wasi\SafeDeleteSslContext.cs" />
     <Compile Include="System\Net\Security\Pal.Wasi\WasiTls.cs"/>
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.ErrorInterop.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IError.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IPoll.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.IStreams.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.PollInterop.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_1.StreamsInterop.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.ITls.cs" />
-    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_1.TlsInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.ErrorInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IError.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IPoll.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.PollInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.StreamsInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.TlsInterop.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseAppleCrypto)' == 'true'">
@@ -488,6 +488,7 @@
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.ThreadPool" />
+    <Reference Include="System.Threading.Thread" />
     <Reference Include="System.IO" />
   </ItemGroup>
 
