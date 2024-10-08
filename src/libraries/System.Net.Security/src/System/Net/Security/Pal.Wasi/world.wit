@@ -1,5 +1,0 @@
-
-world wasi-tls {
-  @unstable(feature = tls)
-  import tls;
-}

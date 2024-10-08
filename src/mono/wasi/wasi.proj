@@ -219,7 +219,6 @@
       but the default dotnet.wasm and requires -S http argument to wasmtime
       -->
       <CMakeConfigurationLinkFlags>$(CMakeBuildRuntimeConfigureCmd) -Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(RepoRoot)', 'src/libraries/System.Net.Http/src/System/Net/Http/WasiHttpHandler/WasiHttpWorld_component_type.wit').Replace('\','/'))&quot;</CMakeConfigurationLinkFlags>
-
       <CMakeBuildRuntimeConfigureCmd>cmake $(MSBuildThisFileDirectory)runtime</CMakeBuildRuntimeConfigureCmd>
       <CMakeBuildRuntimeConfigureCmd Condition="'$(OS)' == 'Windows_NT'">cmake -G Ninja $(MSBuildThisFileDirectory)runtime</CMakeBuildRuntimeConfigureCmd>
 
@@ -242,7 +241,7 @@
       <CMakeBuildRuntimeConfigureCmd Condition="'$(OS)' == 'Windows_NT'">call &quot;$(RepositoryEngineeringDir)native\init-vs-env.cmd&quot; wasm &amp;&amp; $(CMakeBuildRuntimeConfigureCmd)</CMakeBuildRuntimeConfigureCmd>
 
       <CMakeOptions Condition="'$(MonoVerboseBuild)' != ''">-v</CMakeOptions>
-      <CMakeBuildRuntimeCmd>cmake --build . --config $(Configuration) $(CmakeOptions)</CMakeBuildRuntimeCmd>
+      <CMakeBuildRuntimeCmd>cmake --build . -v --config $(Configuration) $(CmakeOptions)</CMakeBuildRuntimeCmd>
       <CMakeBuildRuntimeCmd Condition="'$(OS)' == 'Windows_NT'">call &quot;$(RepositoryEngineeringDir)native\init-vs-env.cmd&quot; &amp;&amp; $(CMakeBuildRuntimeCmd)</CMakeBuildRuntimeCmd>
     </PropertyGroup>
 
