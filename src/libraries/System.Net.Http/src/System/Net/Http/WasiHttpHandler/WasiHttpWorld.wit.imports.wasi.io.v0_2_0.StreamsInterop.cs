@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WasiHttpWorld.wit.imports.wasi.io.v0_2_1
+namespace WasiHttpWorld.wit.imports.wasi.io.v0_2_0
 {
     internal static class StreamsInterop {
 

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using WasiPollWorld.wit.imports.wasi.clocks.v0_2_1;
+using WasiPollWorld.wit.imports.wasi.clocks.v0_2_0;
 
 namespace System.Threading
 {

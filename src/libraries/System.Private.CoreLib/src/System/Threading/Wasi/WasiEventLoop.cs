@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using WasiPollWorld.wit.imports.wasi.io.v0_2_1;
-using Pollable = WasiPollWorld.wit.imports.wasi.io.v0_2_1.IPoll.Pollable;
-using MonotonicClockInterop = WasiPollWorld.wit.imports.wasi.clocks.v0_2_1.MonotonicClockInterop;
+using WasiPollWorld.wit.imports.wasi.io.v0_2_0;
+using Pollable = WasiPollWorld.wit.imports.wasi.io.v0_2_0.IPoll.Pollable;
+using MonotonicClockInterop = WasiPollWorld.wit.imports.wasi.clocks.v0_2_0.MonotonicClockInterop;
 
 namespace System.Threading
 {
