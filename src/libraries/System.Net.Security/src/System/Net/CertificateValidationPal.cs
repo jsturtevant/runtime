@@ -22,7 +22,7 @@ namespace System.Net
             GetRemoteCertificate(securityContext, retrieveChainCertificates: false, ref s_chain, null);
 
         internal static X509Certificate2? GetRemoteCertificate(SafeDeleteContext? securityContext, ref X509Chain? chain, X509ChainPolicy? chainPolicy) =>
-            GetRemoteCertificate(securityContext, retrieveChainCertificates: true, ref chain, chainPolicy);
+            GetRemoteCertificate(securityContext, retrieveChainCertificates: false, ref chain, chainPolicy);
 
         static partial void CheckSupportsStore(StoreLocation storeLocation, ref bool hasSupport);
 

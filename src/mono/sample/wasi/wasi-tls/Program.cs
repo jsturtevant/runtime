@@ -18,21 +18,18 @@ public static class WasiMainWrapper
     {
         var host = "example.com";
         var port = 443;
-    
-        //Thread.Sleep(1000);
 
         using var client = new TcpClient();
         await client.ConnectAsync(host, port);
         using var tcpStream = client.GetStream();
         using var sslStream = new SslStream(tcpStream);
-        Console.WriteLine("Authenticating...");
         await sslStream.AuthenticateAsClientAsync(host);
-        Console.WriteLine("Sending request...");
         await sslStream.WriteAsync(
             Encoding.UTF8.GetBytes(
                 $"GET / HTTP/1.1\r\nhost: {host}:{port}\r\nconnection: close\r\n\r\n"
             )
         );
+        Console.WriteLine("reading response!...");
         var response = new System.IO.MemoryStream();
         await sslStream.CopyToAsync(response);
         Console.WriteLine(Encoding.UTF8.GetString(response.GetBuffer()));

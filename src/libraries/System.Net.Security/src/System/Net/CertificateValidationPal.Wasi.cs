@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
@@ -8,16 +10,22 @@ namespace System.Net
 {
     internal static partial class CertificateValidationPal
     {
+        #pragma warning disable IDE0060
         internal static SslPolicyErrors VerifyCertificateProperties(
-            SafeDeleteContext securityContext,
-            X509Chain chain,
+            SafeDeleteContext _securityContext,
+            X509Chain _chain,
             X509Certificate2? remoteCertificate,
-            bool checkCertName,
-            bool _ /*isServer*/,
-            string? hostName)
+            bool _checkCertName,
+            bool _isServer /*isServer*/,
+            string? _hostName)
         {
-            throw new NotImplementedException(nameof(VerifyCertificateProperties));
+            if (remoteCertificate == null)
+                return SslPolicyErrors.RemoteCertificateNotAvailable;
+
+            //todo do more validations?
+            return SslPolicyErrors.None;
         }
+        #pragma warning restore IDE0060
 
         //
         // Extracts a remote certificate upon request.
@@ -26,10 +34,27 @@ namespace System.Net
         private static X509Certificate2? GetRemoteCertificate(
             SafeDeleteContext? securityContext,
             bool retrieveChainCertificates,
-            ref X509Chain? chain,
-            X509ChainPolicy? chainPolicy)
+            ref X509Chain? _,
+            X509ChainPolicy? __)
         {
-            throw new NotImplementedException(nameof(GetRemoteCertificate));
+            var sslContext = ((SafeDeleteSslContext?)securityContext);
+            if (sslContext == null)
+                return null;
+
+            var remoteIdentity = sslContext.ClientConnection.ServerIdentity();
+            if (remoteIdentity is null)
+                return null;
+
+            var remoteCertChain = remoteIdentity.ExportX509Chain();
+            if (remoteCertChain.Count == 0) {
+                return null;
+            }
+            var cert =  X509CertificateLoader.LoadCertificate(remoteCertChain.First().ToArray());
+            if (retrieveChainCertificates) {
+                // requires some changes in rust-native-tls
+                throw new NotSupportedException("todo: certchain implemented on wasi");
+            }
+            return cert;
         }
 
         // Check if the local certificate has been sent to the peer during the handshake.

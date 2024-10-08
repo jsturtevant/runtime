@@ -417,12 +417,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(UseWasiCrypto)' == 'true'">
-    <Compile Include="System\Net\Security\SslStream.Wasi.cs" />
     <Compile Include="System\Net\Security\CipherSuitesPolicyPal.Wasi.cs" />
     <Compile Include="System\Net\CertificateValidationPal.Wasi.cs" />
     <Compile Include="System\Net\Security\SslStreamCertificateContext.Wasi.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Wasi.cs" />
     <Compile Include="System\Net\Security\Pal.Wasi\SafeDeleteSslContext.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Wasi.cs" />
+    <Compile Include="System\Net\Security\StreamSizes.Wasi.cs" />
     <Compile Include="System\Net\Security\Pal.Wasi\WasiTls.cs"/>
     <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.ErrorInterop.cs" />
     <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IError.cs" />

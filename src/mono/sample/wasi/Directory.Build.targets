@@ -36,10 +36,12 @@
       <_DotnetWasmName Condition="'$(WasmSingleFileBundle)' == 'true'">$([System.IO.Path]::ChangeExtension($(_SampleAssembly), '.wasm'))</_DotnetWasmName>
       <_AppBundlePath>$([MSBuild]::NormalizeDirectory('bin/wasi-wasm/AppBundle'))</_AppBundlePath>
       <WasiCommand>$(WasmtimeDir)wasmtime$(_ExeExt) $(_MONO_LOG_LEVEL) $(_DOTNET_WASI_PRINT_EXIT_CODE)</WasiCommand>
+      <!-- needs host implementation at https://github.com/dicej/dotnet-wasi-tls/tree/main for now -->
+      <WasiCommand Condition="'$(_WasiNeedsTls)' == 'true'">/home/jstur/projects/dotnet-wasi-tls/host/target/release/host --debug</WasiCommand>
 
 
-      <WasiCommand Condition="'$(_WasiNeedsHttp)' == 'true'"                                         >$(WasiCommand) --wasi http</WasiCommand>
-      <WasiCommand Condition="'$(_WasiNeedsSocket)' == 'true'"                                       >$(WasiCommand) --wasi inherit-network --wasi tcp --wasi udp --wasi allow-ip-name-lookup</WasiCommand>
+      <WasiCommand Condition="'$(_WasiNeedsHttp)' == 'true' And '$(_WasiNeedsTls)' != 'true'"                                         >$(WasiCommand) --wasi http</WasiCommand>
+      <WasiCommand Condition="'$(_WasiNeedsSocket)' == 'true' And '$(_WasiNeedsTls)' != 'true'"                                       >$(WasiCommand) --wasi inherit-network --wasi tcp --wasi udp --wasi allow-ip-name-lookup</WasiCommand>
       <WasiCommand Condition="'$(WasmSingleFileBundle)' != 'true'"                                   >$(WasiCommand) --dir .</WasiCommand>
       <WasiCommand                                                                                   >$(WasiCommand) $(_DotnetWasmName)</WasiCommand>
       <WasiCommand Condition="'$(WasmSingleFileBundle)' != 'true'"                                   >$(WasiCommand) $(_SampleProjectName)</WasiCommand>

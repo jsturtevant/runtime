@@ -3,10 +3,10 @@
     <TargetFramework>$(NetCoreAppCurrent)</TargetFramework>
     <_WasiNeedsHttp>true</_WasiNeedsHttp>
     <_WasiNeedsSocket>true</_WasiNeedsSocket>
-    <!-- 
+    <!-- enable trimming so can run with out needing host tls impl -->
     <WasmSingleFileBundle>true</WasmSingleFileBundle>
     <InvariantGlobalization>true</InvariantGlobalization>
-    -->
+   
   </PropertyGroup>
 
   <Target Name="RunSample" DependsOnTargets="RunSampleWithWasmtime" />

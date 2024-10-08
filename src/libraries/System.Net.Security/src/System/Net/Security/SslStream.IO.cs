@@ -769,6 +769,14 @@ namespace System.Net.Security
                 {
                     // recalculate frame size if needed e.g. we could not get it before.
                     frameSize = GetFrameSize(_buffer.EncryptedReadOnlySpan);
+
+                    // This is hack: the sslstream implementation manages frame sizes sent to the ssl context
+                    // this means in wasi implementation we don't always get the correct amount and can hang
+                    // The wasi ssl implementation isn't low level enough to handle this.
+                    if (bytesRead> frameSize) {
+                        frameSize = bytesRead;
+                    }
+                    Console.WriteLine("frame size {0} bytes", frameSize);
                     _buffer.EnsureAvailableSpace(frameSize - _buffer.EncryptedLength);
                 }
             }
@@ -1020,7 +1028,7 @@ namespace System.Net.Security
             {
                 throw new IOException(SR.net_ssl_io_frame);
             }
-
+            Console.WriteLine("header length: {0}, type: {1}, version: {2}", _lastFrame.Header.Length, _lastFrame.Header.Type, _lastFrame.Header.Version);
             if (_lastFrame.Header.Length < 0)
             {
                 if (NetEventSource.Log.IsEnabled()) NetEventSource.Error(this, "invalid TLS frame size");

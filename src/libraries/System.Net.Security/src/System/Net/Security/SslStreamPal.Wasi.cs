@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
@@ -14,7 +15,7 @@ namespace System.Net.Security
     {
         public static Exception GetException(SecurityStatusPal status)
         {
-             throw new PlatformNotSupportedException(nameof(GetException));
+            return status.Exception ?? new Win32Exception((int)status.ErrorCode);
         }
 
         internal const bool StartMutualAuthAsAnonymous = false;
@@ -40,7 +41,7 @@ namespace System.Net.Security
             out int consumed,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, out consumed, sslAuthenticationOptions);
+            return HandshakeInternal(ref context, inputBuffer, out consumed, sslAuthenticationOptions);
         }
 
         public static ProtocolToken InitializeSecurityContext(
@@ -51,7 +52,7 @@ namespace System.Net.Security
             out int consumed,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, out consumed, sslAuthenticationOptions);
+            return HandshakeInternal(ref context, inputBuffer, out consumed, sslAuthenticationOptions);
         }
 
         public static ProtocolToken Renegotiate(
@@ -74,7 +75,14 @@ namespace System.Net.Security
             int headerSize,
             int trailerSize)
         {
-            throw new PlatformNotSupportedException();
+            ProtocolToken token = default;
+
+            securityContext!.SslWrite(input.Span);
+            securityContext!.ReadPendingWrites(ref token);
+
+            token.Status = new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+
+            return token;
         }
 
         public static SecurityStatusPal DecryptMessage(
@@ -83,7 +91,21 @@ namespace System.Net.Security
             out int offset,
             out int count)
         {
-            throw new PlatformNotSupportedException();
+            offset = 0;
+            count = 0;
+
+            try
+            {
+                securityContext!.Write(buffer);
+
+                var read = securityContext!.SslRead(buffer);
+                count = read;
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+            }
+            catch (Exception e)
+            {
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, e);
+            }
         }
 
         public static ChannelBinding? QueryContextChannelBinding(
@@ -98,14 +120,14 @@ namespace System.Net.Security
             SafeDeleteContext? securityContext,
             out StreamSizes streamSizes)
         {
-            throw new PlatformNotSupportedException();
+            streamSizes = StreamSizes.Default;
         }
 
         public static void QueryContextConnectionInfo(
             SafeDeleteSslContext securityContext,
             ref SslConnectionInfo connectionInfo)
         {
-            throw new PlatformNotSupportedException();
+            connectionInfo.UpdateSslConnectionInfo(securityContext);
         }
 
         public static bool TryUpdateClintCertificate(
@@ -117,7 +139,6 @@ namespace System.Net.Security
         }
 
         private static ProtocolToken HandshakeInternal(
-            SafeFreeCredentials credential,
             ref SafeDeleteSslContext? context,
             ReadOnlySpan<byte> inputBuffer,
             out int consumed,
@@ -126,8 +147,9 @@ namespace System.Net.Security
             ProtocolToken token = default;
             consumed = 0;
 
-            try{
-                SafeDeleteSslContext? sslContext = ((SafeDeleteSslContext?)context);
+            try
+            {
+                SafeDeleteSslContext? sslContext = (SafeDeleteSslContext?)context;
 
                 if (context == null || context.IsInvalid)
                 {
@@ -135,8 +157,13 @@ namespace System.Net.Security
                     sslContext = context;
                 }
 
-                // var handshake = new ITls.ClientConnection(cipherInput, cipherOutput).Connect(host);
+                if (inputBuffer.Length > 0)
+                {
+                    sslContext!.Write(inputBuffer);
+                }
                 consumed = inputBuffer.Length;
+
+                token.Status = sslContext!.FinishHandShake(ref token);
 
                 return token;
             }

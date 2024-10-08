@@ -4,9 +4,29 @@ interface tls {
   use wasi:io/streams@0.2.0.{input-stream, output-stream};
   use wasi:io/poll@0.2.0.{pollable};
 
+  type protocol-version = u16;
+
+  type alpn-id = list<u8>;
+
+  type cipher-suite = u16;
+
+  resource public-identity {
+    export-X509-chain: func() -> list<list<u8>>;
+  }
+
+  resource private-identity {
+    public-identity: func() -> public-identity;
+  }
+
   resource client-connection {
     constructor(input: input-stream, output: output-stream);
     connect: func(server-name: string) -> result<client-handshake>;
+    server-name: func() -> option<string>;
+    alpn-id: func() -> option<alpn-id>;
+    client-identity: func() -> option<private-identity>;
+    server-identity: func() -> option<public-identity>;
+    protocol-version: func() -> option<protocol-version>;
+    cipher-suite: func() -> option<cipher-suite>;
   }
 
   resource client-handshake {

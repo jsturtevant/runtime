@@ -782,7 +782,13 @@ namespace System.Net.Sockets
                     Debug.Assert(flags == SocketFlags.None);
                     received = SysRead(socket, buffer, out errno);
                 }
-                else if (buffer.Length == 0)
+                else if (buffer.Length == 0 && OperatingSystem.IsWasi()){
+                     // wasi doesn't currently support peek and will error out if buffer length is 0
+                     // https://github.com/WebAssembly/wasi-libc/blob/a05277a6803d99dc5f8d5c250a02cf37ff90882a/libc-bottom-half/sources/recv.c#L14-L17
+                     received = 0;
+                     errno = Interop.Error.SUCCESS;
+                }
+                else if (buffer.Length == 0 && !OperatingSystem.IsWasi())
                 {
                     // Special case a receive of 0 bytes into a single buffer.  A common pattern is to ReceiveAsync 0 bytes in order
                     // to be asynchronously notified when data is available, without needing to dedicate a buffer.  Some platforms (e.g. macOS),
@@ -850,7 +856,15 @@ namespace System.Net.Sockets
                     // Receive into a set of buffers
                     received = SysReceive(socket, flags, buffers, socketAddress, out receivedSocketAddressLength, out receivedFlags, out errno);
                 }
-                else if (buffer.Length == 0)
+                else if (buffer.Length == 0 && OperatingSystem.IsWasi()){
+                     // wasi doesn't currently support peek and will error out if buffer length is 0
+                     // https://github.com/WebAssembly/wasi-libc/blob/a05277a6803d99dc5f8d5c250a02cf37ff90882a/libc-bottom-half/sources/recv.c#L14-L17
+                     received = 0;
+                     receivedSocketAddressLength = 0;
+                     errno = Interop.Error.SUCCESS;
+                     receivedFlags = default;
+                }
+                else if (buffer.Length == 0 && !OperatingSystem.IsWasi())
                 {
                     // Special case a receive of 0 bytes into a single buffer.  A common pattern is to ReceiveAsync 0 bytes in order
                     // to be asynchronously notified when data is available, without needing to dedicate a buffer.  Some platforms (e.g. macOS),

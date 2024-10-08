@@ -1,12 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
+using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using WasiTlsWorld;
 using WasiTlsWorld.wit.imports.wasi.io.v0_2_0;
 using WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0;
@@ -16,52 +14,122 @@ namespace System.Net
 {
     internal sealed class SafeDeleteSslContext : SafeDeleteContext
     {
-        private SslStream.WasiProxy cipherStream { get; }
-        private ITls.ClientHandshake clientConnection { get; }
+        private ITls.FutureStreams? future;
+
+        private WasiStream? tlsStream { get; set; }
+        private ITls.ClientConnection clientConnection { get; }
+        private ITls.ClientHandshake handshake;
+        private WasiStream hostProxy;
+
+        public ITls.ClientConnection ClientConnection { get { return this.clientConnection; } }
 
         public SafeDeleteSslContext(SslAuthenticationOptions authOptions)
             : base(IntPtr.Zero)
         {
-            cipherStream = authOptions.SslStreamProxy
-                ?? throw new ArgumentNullException(nameof(authOptions.SslStreamProxy));
+            // We need to create two different ends to create a stream
+            // The host implementation of makepipe creates a channel with a receive and send side which are returned here
+            // The host will wire up the host sides to the SSL context and we use the other sides to read/write to the
+            // ssl context.
+            // componentWrite will end up writing to the SSL context on the host
+            // componentRead will read output from SSL Context
+            // The pipes here are initially created for the handshake process
+            // and different read/write endpoints will be returned once the handshake is complete.
+            (IStreams.InputStream hostTlsRead, IStreams.OutputStream componentWrite) = TlsInterop.MakePipe();
+            (IStreams.InputStream componentRead, IStreams.OutputStream hostTlsWrite) = TlsInterop.MakePipe();
+            hostProxy = new WasiStream(componentRead, componentWrite);
 
-            IStreams.InputStream cipherInput;
-            IStreams.OutputStream cipherOutput;
-            var (inputA, outputA) = TlsInterop.MakePipe();
-            var (inputB, outputB) = TlsInterop.MakePipe();
-            cipherInput = inputA;
-            cipherOutput = outputB;
-            var proxy = new WasiStream(inputB, outputA);
-            _ = proxy.CopyToAsync(cipherStream.Stream);
-            _ = cipherStream.Stream.CopyToAsync(proxy);
+            clientConnection = new ITls.ClientConnection(hostTlsRead, hostTlsWrite);
+            handshake = clientConnection.Connect(authOptions.TargetHost);
 
-            clientConnection = new ITls.ClientConnection(cipherInput, cipherOutput).Connect(authOptions.TargetHost);
-            //todo could configurat all the variaous options here
+            //TODO could configure all the various client options here such as alpn, etc.
+        }
+
+        internal SecurityStatusPal FinishHandShake(ref ProtocolToken token)
+        {
+            while (true)
+            {
+                if (this.future is null)
+                {
+                    future = ITls.ClientHandshake.Finish(handshake);
+                }
+                var result = future.Get();
+                if (result is not null)
+                {
+                    var inner = (
+                        (Result<Result<(IStreams.InputStream, IStreams.OutputStream), None>, None>)
+                            result!
+                    ).AsOk;
+                    if (inner.IsOk)
+                    {
+                        var (input, output) = inner.AsOk;
+                        tlsStream = new WasiStream(input, output);
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
+                    }
+                    else
+                    {
+                        return new SecurityStatusPal(
+                            SecurityStatusPalErrorCode.InternalError, new Exception("TLS handshake failed"));
+                    }
+                }
+                else
+                {
+                    var poll = this.future.Subscribe();
+                    if (!poll.Ready()){
+                        ReadPendingWrites(ref token);
+                        return new SecurityStatusPal(SecurityStatusPalErrorCode.ContinueNeeded);
+                    }
+                }
+            }
 
         }
 
-        public override bool IsInvalid => true;
+        public override bool IsInvalid => clientConnection == null;
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
         }
-    }
-    internal static class WasiInterop
-    {
-        public static Task RegisterWasiPollable(IPoll.Pollable pollable, CancellationToken cancellationToken)
+
+        internal void Write(ReadOnlySpan<byte> inputBuffer)
         {
-            var handle = pollable.Handle;
+            // send to the host
+            this.hostProxy.Write(inputBuffer);
 
-            // this will effectively neutralize Dispose() of the Pollable()
-            // because in the CoreLib we create another instance, which will dispose it
-            pollable.Handle = 0;
-            GC.SuppressFinalize(pollable);
+            // if (inputBuffer.Length == 160){
+            //     Console.WriteLine("going to skip reading for now since this is a header");
+            //     //this.dontread = true;
+            // }
 
-            return CallRegisterWasiPollableHandle((Thread)null!, handle, true, cancellationToken);
+            // if (inputBuffer.Length == 74) {
+            //     Console.WriteLine("ready to read again!");
+            //     //this.dontread = false;
+            // }
+        }
 
-            [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "RegisterWasiPollableHandle")]
-            static extern Task CallRegisterWasiPollableHandle(Thread t, int handle, bool ownsPollable, CancellationToken cancellationToken);
+        internal void SslWrite(ReadOnlySpan<byte> input){
+            tlsStream!.Write(input);
+        }
+
+        internal int SslRead(Span<byte> buffer){
+            var readAtleast = buffer.Length;
+            if (buffer.Length >= 100) {
+                readAtleast = buffer.Length-100;
+            }
+            return tlsStream!.ReadAtLeast(buffer, readAtleast, false);
+        }
+
+        private const int DefaultCopyBufferSize = 81920;
+        internal void ReadPendingWrites(ref ProtocolToken token)
+        {
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(DefaultCopyBufferSize);
+            var bytesRead = hostProxy.Read(buffer);
+            if (bytesRead == 0) {
+                token.Size = 0;
+                token.Payload = null;
+                return;
+            }
+
+            token.SetPayload(new ReadOnlySpan<byte>(buffer, 0, bytesRead));
         }
     }
 
@@ -116,22 +184,7 @@ namespace System.Net
             throw new NotImplementedException();
         }
 
-        public override int Read(byte[] buffer, int offset, int length)
-        {
-           throw new NotImplementedException();
-        }
-
-        public override void Write(byte[] buffer, int offset, int length)
-        {
-           throw new NotImplementedException();
-        }
-
-        public override async Task<int> ReadAsync(
-            byte[] bytes,
-            int offset,
-            int length,
-            CancellationToken cancellationToken
-        )
+        public override int Read(byte[] bytes, int offset, int length)
         {
             while (true)
             {
@@ -150,9 +203,8 @@ namespace System.Net
                         var buffer = result;
                         if (buffer.Length == 0)
                         {
-                            await WasiInterop
-                                .RegisterWasiPollable(input.Subscribe(), cancellationToken)
-                                .ConfigureAwait(false);
+                            var poll = input.Subscribe();
+                            PollInterop.Poll(new List<IPoll.Pollable>() { poll });
                         }
                         else
                         {
@@ -193,24 +245,7 @@ namespace System.Net
             }
         }
 
-        public override async ValueTask<int> ReadAsync(
-            Memory<byte> buffer,
-            CancellationToken cancellationToken = default
-        )
-        {
-            // TODO: avoid copy when possible and use ArrayPool when not
-            var dst = new byte[buffer.Length];
-            var result = await ReadAsync(dst.AsMemory(0, buffer.Length), cancellationToken).ConfigureAwait(false);
-            new ReadOnlySpan<byte>(dst, 0, result).CopyTo(buffer.Span);
-            return result;
-        }
-
-        public override async Task WriteAsync(
-            byte[] bytes,
-            int offset,
-            int length,
-            CancellationToken cancellationToken
-        )
+        public override void Write(byte[] bytes, int offset, int length)
         {
             var limit = offset + length;
             var flushing = false;
@@ -227,8 +262,8 @@ namespace System.Net
                 }
                 if (count == 0)
                 {
-                    await WasiInterop
-                                .RegisterWasiPollable(output.Subscribe(), cancellationToken).ConfigureAwait(false);
+                    var poll = output.Subscribe();
+                    PollInterop.Poll(new List<IPoll.Pollable>() { poll });
                 }
                 else if (offset == limit)
                 {
@@ -283,15 +318,5 @@ namespace System.Net
             }
         }
 
-        public override ValueTask WriteAsync(
-            ReadOnlyMemory<byte> buffer,
-            CancellationToken cancellationToken = default
-        )
-        {
-            // TODO: avoid copy when possible and use ArrayPool when not
-            var copy = new byte[buffer.Length];
-            buffer.Span.CopyTo(copy);
-            return new ValueTask(WriteAsync(copy, 0, buffer.Length, cancellationToken));
-        }
     }
 }

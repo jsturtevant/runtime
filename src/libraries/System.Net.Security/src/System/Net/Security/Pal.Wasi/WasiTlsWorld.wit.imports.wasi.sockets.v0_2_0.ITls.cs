@@ -15,6 +15,115 @@ namespace WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0;
 
 internal interface ITls {
 
+    /**
+    * A X509 certificate chain; starting with the end-entity's certificate
+    * followed by 0 or more intermediate certificates.
+    */
+
+    internal class PublicIdentity: IDisposable {
+        internal int Handle { get; set; }
+
+        internal readonly record struct THandle(int Handle);
+
+        internal PublicIdentity(THandle handle) {
+            Handle = handle.Handle;
+        }
+
+        public void Dispose() {
+            Dispose(true);
+        }
+
+        [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[resource-drop]public-identity"), WasmImportLinkage]
+        private static extern void wasmImportResourceDrop(int p0);
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing && Handle != 0) {
+                wasmImportResourceDrop(Handle);
+                Handle = 0;
+            }
+        }
+
+        internal static class ExportX509ChainWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]public-identity.export-X509-chain"), WasmImportLinkage]
+            internal static extern void wasmImportExportX509Chain(int p0, nint p1);
+
+        }
+
+        internal   unsafe List<byte[]> ExportX509Chain()
+        {
+            var handle = this.Handle;
+
+            var retArea = new uint[2];
+            fixed (uint* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                ExportX509ChainWasmInterop.wasmImportExportX509Chain(handle, ptr);
+
+                var array0 = new List<byte[]>(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4)));
+                for (int index = 0; index < BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4)); ++index) {
+                    nint basePtr = BitConverter.ToInt32(new Span<byte>((void*)(ptr + 0), 4)) + (index * 8);
+
+                    var array = new byte[BitConverter.ToInt32(new Span<byte>((void*)(basePtr + 4), 4))];
+                    new Span<byte>((void*)(BitConverter.ToInt32(new Span<byte>((void*)(basePtr + 0), 4))), BitConverter.ToInt32(new Span<byte>((void*)(basePtr + 4), 4))).CopyTo(new Span<byte>(array));
+
+                    array0.Add(array);
+                }
+                return array0;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+    }
+
+    /**
+    * The combination of a private key with its public certificate(s).
+    * The private key data can not be exported.
+    */
+
+    internal class PrivateIdentity: IDisposable {
+        internal int Handle { get; set; }
+
+        internal readonly record struct THandle(int Handle);
+
+        internal PrivateIdentity(THandle handle) {
+            Handle = handle.Handle;
+        }
+
+        public void Dispose() {
+            Dispose(true);
+        }
+
+        [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[resource-drop]private-identity"), WasmImportLinkage]
+        private static extern void wasmImportResourceDrop(int p0);
+
+        protected virtual void Dispose(bool disposing) {
+            if (disposing && Handle != 0) {
+                wasmImportResourceDrop(Handle);
+                Handle = 0;
+            }
+        }
+
+        internal static class PublicIdentityWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]private-identity.public-identity"), WasmImportLinkage]
+            internal static extern int wasmImportPublicIdentity(int p0);
+
+        }
+
+        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity PublicIdentity()
+        {
+            var handle = this.Handle;
+            var result =  PublicIdentityWasmInterop.wasmImportPublicIdentity(handle);
+            var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity.THandle(result));
+            return resource;
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+    }
+
     internal class ClientConnection: IDisposable {
         internal int Handle { get; set; }
 
@@ -100,6 +209,245 @@ internal interface ITls {
                 } else {
                     throw new WitException(lifted.AsErr!, 0);
                 }
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class ServerNameWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.server-name"), WasmImportLinkage]
+            internal static extern void wasmImportServerName(int p0, nint p1);
+
+        }
+
+        internal   unsafe string? ServerName()
+        {
+            var handle = this.Handle;
+
+            var retArea = new uint[3];
+            fixed (uint* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                ServerNameWasmInterop.wasmImportServerName(handle, ptr);
+
+                string? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+
+                        lifted = Encoding.UTF8.GetString((byte*)BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4)), BitConverter.ToInt32(new Span<byte>((void*)(ptr + 8), 4)));
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class AlpnIdWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.alpn-id"), WasmImportLinkage]
+            internal static extern void wasmImportAlpnId(int p0, nint p1);
+
+        }
+
+        internal   unsafe byte[]? AlpnId()
+        {
+            var handle = this.Handle;
+
+            var retArea = new uint[3];
+            fixed (uint* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                AlpnIdWasmInterop.wasmImportAlpnId(handle, ptr);
+
+                byte[]? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+
+                        var array = new byte[BitConverter.ToInt32(new Span<byte>((void*)(ptr + 8), 4))];
+                        new Span<byte>((void*)(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))), BitConverter.ToInt32(new Span<byte>((void*)(ptr + 8), 4))).CopyTo(new Span<byte>(array));
+
+                        lifted = array;
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class ClientIdentityWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.client-identity"), WasmImportLinkage]
+            internal static extern void wasmImportClientIdentity(int p0, nint p1);
+
+        }
+
+        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PrivateIdentity? ClientIdentity()
+        {
+            var handle = this.Handle;
+
+            var retArea = new uint[2];
+            fixed (uint* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                ClientIdentityWasmInterop.wasmImportClientIdentity(handle, ptr);
+
+                global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PrivateIdentity? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+                        var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PrivateIdentity(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PrivateIdentity.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
+
+                        lifted = resource;
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class ServerIdentityWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.server-identity"), WasmImportLinkage]
+            internal static extern void wasmImportServerIdentity(int p0, nint p1);
+
+        }
+
+        internal   unsafe global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity? ServerIdentity()
+        {
+            var handle = this.Handle;
+
+            var retArea = new uint[2];
+            fixed (uint* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                ServerIdentityWasmInterop.wasmImportServerIdentity(handle, ptr);
+
+                global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+                        var resource = new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity(new global::WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.PublicIdentity.THandle(BitConverter.ToInt32(new Span<byte>((void*)(ptr + 4), 4))));
+
+                        lifted = resource;
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class ProtocolVersionWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.protocol-version"), WasmImportLinkage]
+            internal static extern void wasmImportProtocolVersion(int p0, nint p1);
+
+        }
+
+        internal   unsafe ushort? ProtocolVersion()
+        {
+            var handle = this.Handle;
+
+            var retArea = new ushort[2];
+            fixed (ushort* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                ProtocolVersionWasmInterop.wasmImportProtocolVersion(handle, ptr);
+
+                ushort? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+
+                        lifted = ((ushort)BitConverter.ToUInt16(new Span<byte>((void*)(ptr + 2), 2)));
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
+            }
+
+            //TODO: free alloc handle (interopString) if exists
+        }
+
+        internal static class CipherSuiteWasmInterop
+        {
+            [DllImport("wasi:sockets/tls@0.2.0", EntryPoint = "[method]client-connection.cipher-suite"), WasmImportLinkage]
+            internal static extern void wasmImportCipherSuite(int p0, nint p1);
+
+        }
+
+        internal   unsafe ushort? CipherSuite()
+        {
+            var handle = this.Handle;
+
+            var retArea = new ushort[2];
+            fixed (ushort* retAreaByte0 = &retArea[0])
+            {
+                var ptr = (nint)retAreaByte0;
+                CipherSuiteWasmInterop.wasmImportCipherSuite(handle, ptr);
+
+                ushort? lifted;
+
+                switch (new Span<byte>((void*)(ptr + 0), 1)[0]) {
+                    case 0: {
+                        lifted = null;
+                        break;
+                    }
+
+                    case 1: {
+
+                        lifted = ((ushort)BitConverter.ToUInt16(new Span<byte>((void*)(ptr + 2), 2)));
+                        break;
+                    }
+
+                    default: throw new ArgumentException("invalid discriminant: " + (new Span<byte>((void*)(ptr + 0), 1)[0]));
+                }
+                return lifted;
             }
 
             //TODO: free alloc handle (interopString) if exists
