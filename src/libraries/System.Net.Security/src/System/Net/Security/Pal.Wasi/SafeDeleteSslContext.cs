@@ -36,7 +36,7 @@ namespace System.Net
             _ = cipherStream.Stream.CopyToAsync(proxy);
 
             clientConnection = new ITls.ClientConnection(cipherInput, cipherOutput).Connect(authOptions.TargetHost);
-            //todo could configurat all the variaous options here
+            //todo could configure all the various client options here
 
         }
 

@@ -18,8 +18,6 @@ public static class WasiMainWrapper
     {
         var host = "example.com";
         var port = 443;
-    
-        //Thread.Sleep(1000);
 
         using var client = new TcpClient();
         await client.ConnectAsync(host, port);

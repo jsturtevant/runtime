@@ -134,7 +134,8 @@ namespace System.Net.Security
                     context = new SafeDeleteSslContext(sslAuthenticationOptions);
                     sslContext = context;
                 }
-
+                
+                // TODO - complete handshake and set token return value
                 // var handshake = new ITls.ClientConnection(cipherInput, cipherOutput).Connect(host);
                 consumed = inputBuffer.Length;
 
