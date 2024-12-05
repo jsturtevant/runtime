@@ -16,7 +16,7 @@ public static class WasiMainWrapper
 {
     public static async Task<int> MainAsync(string[] args)
     {
-        var host = "bytecodealliance.org";
+        var host = "example.com";
         var port = 443;
 
         using var client = new TcpClient();
@@ -29,7 +29,6 @@ public static class WasiMainWrapper
                 $"GET / HTTP/1.1\r\nhost: {host}:{port}\r\nconnection: close\r\n\r\n"
             )
         );
-        Console.WriteLine("reading response!...");
         var response = new System.IO.MemoryStream();
         await sslStream.CopyToAsync(response);
         Console.WriteLine(Encoding.UTF8.GetString(response.GetBuffer()));

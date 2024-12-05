@@ -47,9 +47,12 @@ namespace System.Net.Security
                 }
             }
 
-            Console.WriteLine("Starting context");
+            if (IsServer) {
+                // Server authentication is not currently implemented
+                throw new NotSupportedException("Server Authentication is not implemented");
+            }
             _securityContext = new SafeDeleteSslContext(_sslAuthenticationOptions, InnerStream);
-            Console.WriteLine("kick off authentication");
+
             try{
                 await _securityContext.AuthenticateAsync().ConfigureAwait(false);
                 CompleteHandshake(_sslAuthenticationOptions);
@@ -61,7 +64,6 @@ namespace System.Net.Security
                     _nestedAuth = NestedState.StreamNotInUse;
                 }
             }
-            Console.WriteLine("complete");
 
 #pragma warning disable SYSLIB0058 // Use NegotiatedCipherSuite.
             if (NetEventSource.Log.IsEnabled())

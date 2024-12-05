@@ -37,7 +37,7 @@
       <_AppBundlePath>$([MSBuild]::NormalizeDirectory('bin/wasi-wasm/AppBundle'))</_AppBundlePath>
       <WasiCommand>$(WasmtimeDir)wasmtime$(_ExeExt) $(_MONO_LOG_LEVEL) $(_DOTNET_WASI_PRINT_EXIT_CODE)</WasiCommand>
       
-      <!-- needs host implementation at https://github.com/dicej/dotnet-wasi-tls/tree/main for now -->
+      <!-- needs host implementation at https://github.com/jsturtevant/dotnet-wasi-tls/tree/passthrough for now -->
       <WasiCommand Condition="'$(_WasiNeedsTls)' == 'true'">/home/jstur/projects/dotnet-wasi-tls/host/target/release/host --debug</WasiCommand>
 
 
