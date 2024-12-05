@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);INTERNAL_ASYMMETRIC_IMPLEMENTATIONS</DefineConstants>
-    <TargetFrameworks>$(NetCoreAppCurrent)-windows;$(NetCoreAppCurrent)-unix;$(NetCoreAppCurrent)-android;$(NetCoreAppCurrent)-osx;$(NetCoreAppCurrent)-ios;$(NetCoreAppCurrent)-tvos;$(NetCoreAppCurrent)-browser;$(NetCoreAppCurrent)</TargetFrameworks>
+    <TargetFrameworks>$(NetCoreAppCurrent)-windows;$(NetCoreAppCurrent)-unix;$(NetCoreAppCurrent)-android;$(NetCoreAppCurrent)-osx;$(NetCoreAppCurrent)-ios;$(NetCoreAppCurrent)-tvos;$(NetCoreAppCurrent)-browser;$(NetCoreAppCurrent)-wasi;$(NetCoreAppCurrent)</TargetFrameworks>
     <NoWarn>$(NoWarn);CA5350;CA5351;CA5379;CA5384;SYSLIB0026</NoWarn>
     <!-- PasswordDeriveBytes.GetBytes is obsolete but DeriveBytes.GetBytes intentionally isn't. -->
     <NoWarn>$(NoWarn);CS0809</NoWarn>
@@ -644,7 +644,7 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'browser'">
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'browser' Or '$(TargetPlatformIdentifier)' == 'wasi'">
     <!-- GetRandomBytes is identical on Unix and Browser -->
     <Compile Include="$(CommonPath)Interop\Unix\System.Native\Interop.GetRandomBytes.cs"
              Link="Common\Interop\Unix\System.Native\Interop.GetRandomBytes.cs" />
@@ -689,13 +689,22 @@
     <Compile Include="System\Security\Cryptography\SHAHashProvider.Browser.Managed.cs" />
     <Compile Include="System\Security\Cryptography\TripleDESCryptoServiceProvider.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\TripleDesImplementation.NotSupported.cs" />
-    <Compile Include="System\Security\Cryptography\X509Certificates\CertificatePal.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\ChainPal.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\FindPal.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\LegacyBasicConstraintsDecoder.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\StorePal.NotSupported.cs" />
-    <Compile Include="System\Security\Cryptography\X509Certificates\X509CertificateLoader.NotSupported.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Pal.NotSupported.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\CertificatePal.NotSupported.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'browser'">
+    <Compile Include="System\Security\Cryptography\X509Certificates\X509CertificateLoader.NotSupported.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'wasi'">
+    <Compile Include="System\Security\Cryptography\X509Certificates\X509CertificateLoader.Wasi.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\WasiCertificatePal.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\CertificateData.ManagedDecode.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(NeedOpenSslInitializer)' == 'true'">

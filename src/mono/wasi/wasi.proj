@@ -203,6 +203,7 @@
                                   $(ICULibDir)/libicudata.a" />
       <ICULibFiles Include="$(ICULibDir)/*.dat" />
       <WASIComponentImports Include="$(RepoRoot)src/libraries/System.Net.Http/src/System/Net/Http/WasiHttpHandler/WasiHttpWorld_component_type.wit" />
+      <WASIComponentImports Include="$(RepoRoot)src/libraries/System.Net.Security/src/System/Net/Security/Pal.Wasi/WasiTlsWorld_component_type.wit" />
     </ItemGroup>
     <PropertyGroup>
       <PInvokeTableFile>$(WasiObjDir)\pinvoke-table.h</PInvokeTableFile>
@@ -218,8 +219,9 @@
       it will get trimmed when HTTP is not used and using publish + native rebuild
       but the default dotnet.wasm and requires -S http argument to wasmtime
       -->
-      <CMakeConfigurationLinkFlags>$(CMakeBuildRuntimeConfigureCmd) -Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(RepoRoot)', 'src/libraries/System.Net.Http/src/System/Net/Http/WasiHttpHandler/WasiHttpWorld_component_type.wit').Replace('\','/'))&quot;</CMakeConfigurationLinkFlags>
-
+      <CMakeConfigurationLinkFlags>$(CMakeConfigurationLinkFlags) -Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(RepoRoot)', 'src/libraries/System.Net.Http/src/System/Net/Http/WasiHttpHandler/WasiHttpWorld_component_type.wit').Replace('\','/'))&quot;</CMakeConfigurationLinkFlags>
+      <CMakeConfigurationLinkFlags>$(CMakeConfigurationLinkFlags) -Wl,--component-type,&quot;$([MSBuild]::NormalizePath('$(RepoRoot)', 'src/libraries/System.Net.Security/src/System/Net/Security/Pal.Wasi/WasiTlsWorld_component_type.wit').Replace('\','/'))&quot;</CMakeConfigurationLinkFlags>
+      
       <CMakeBuildRuntimeConfigureCmd>cmake $(MSBuildThisFileDirectory)runtime</CMakeBuildRuntimeConfigureCmd>
       <CMakeBuildRuntimeConfigureCmd Condition="'$(OS)' == 'Windows_NT'">cmake -G Ninja $(MSBuildThisFileDirectory)runtime</CMakeBuildRuntimeConfigureCmd>
 

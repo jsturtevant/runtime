@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetCoreAppCurrent)-windows;$(NetCoreAppCurrent)-linux;$(NetCoreAppCurrent)-freebsd;$(NetCoreAppCurrent)-haiku;$(NetCoreAppCurrent)-android;$(NetCoreAppCurrent)-osx;$(NetCoreAppCurrent)-ios;$(NetCoreAppCurrent)-tvos;$(NetCoreAppCurrent)</TargetFrameworks>
+    <TargetFrameworks>$(NetCoreAppCurrent)-windows;$(NetCoreAppCurrent)-linux;$(NetCoreAppCurrent)-freebsd;$(NetCoreAppCurrent)-haiku;$(NetCoreAppCurrent)-android;$(NetCoreAppCurrent)-osx;$(NetCoreAppCurrent)-ios;$(NetCoreAppCurrent)-tvos;$(NetCoreAppCurrent)-wasi;$(NetCoreAppCurrent)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- This is needed so that code for TlsCipherSuite will have no namespace (causes compile errors) when used within T4 template  -->
     <DefineConstants>$(DefineConstants);PRODUCT</DefineConstants>
@@ -16,9 +16,10 @@
     <DefineConstants Condition="'$(TargetPlatformIdentifier)' == 'windows'">$(DefineConstants);TARGET_WINDOWS</DefineConstants>
     <DefineConstants Condition="'$(TargetPlatformIdentifier)' == 'android'">$(DefineConstants);TARGET_ANDROID</DefineConstants>
     <UseAndroidCrypto Condition="'$(TargetPlatformIdentifier)' == 'android'">true</UseAndroidCrypto>
+    <UseWasiCrypto Condition="'$(TargetPlatformIdentifier)' == 'wasi'">true</UseWasiCrypto>
     <UseAppleCrypto Condition="'$(TargetPlatformIdentifier)' == 'osx' or '$(TargetPlatformIdentifier)' == 'ios' or '$(TargetPlatformIdentifier)' == 'tvos'">true</UseAppleCrypto>
     <UseManagedNtlm Condition="'$(TargetPlatformIdentifier)' == 'android' or '$(TargetPlatformIdentifier)' == 'tvos'">true</UseManagedNtlm>
-    <DefineConstants Condition="'$(UseAndroidCrypto)' == 'true' or '$(UseAppleCrypto)' == 'true'">$(DefineConstants);SYSNETSECURITY_NO_OPENSSL</DefineConstants>
+    <DefineConstants Condition="'$(UseAndroidCrypto)' == 'true' or '$(UseAppleCrypto)' == 'true' or '$(UseWasiCrypto)' == 'true'">$(DefineConstants);SYSNETSECURITY_NO_OPENSSL</DefineConstants>
     <GenAPIExcludeApiList>ReferenceAssemblyExclusions.txt</GenAPIExcludeApiList>
   </PropertyGroup>
 
@@ -33,7 +34,14 @@
              Link="Common\System\Net\UriScheme.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != '' And '$(UseWasiCrypto)' != 'true'">
+    <Compile Include="System\Net\Security\SslStream.IO.Tokens.cs" />
+    <Compile Include="System\Net\Security\SslStream.Protocol.Tokens.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''">
+    <Compile Include="System\Net\Security\SslStream.IO.cs" />
+    <Compile Include="System\Net\Security\SslStream.Protocol.cs" />
     <Compile Include="System\Net\CertificateValidationPal.cs" />
     <Compile Include="System\Net\NegotiateAuthenticationPal.cs" />
     <Compile Include="System\Net\NegotiateAuthenticationPal.Unsupported.cs" />
@@ -57,8 +65,6 @@
     <Compile Include="System\Net\Security\SslServerAuthenticationOptions.cs" />
     <Compile Include="System\Net\Security\SslSessionsCache.cs" />
     <Compile Include="System\Net\Security\SslStream.cs" />
-    <Compile Include="System\Net\Security\SslStream.IO.cs" />
-    <Compile Include="System\Net\Security\SslStream.Protocol.cs" />
     <Compile Include="System\Net\Security\SslStreamCertificateContext.cs" />
     <Compile Include="System\Net\Security\SslConnectionInfo.cs" />
     <Compile Include="System\Net\Security\StreamSizes.cs" />
@@ -325,7 +331,7 @@
              Link="Common\System\Security\Cryptography\CryptoPool.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformIdentifier)' != 'windows' and '$(UseAndroidCrypto)' != 'true' and '$(UseAppleCrypto)' != 'true'">
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformIdentifier)' != 'windows' and '$(UseAndroidCrypto)' != 'true' and '$(UseAppleCrypto)' != 'true' and '$(UseWasiCrypto)' != 'true'">
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
     <Compile Include="System\Net\Security\CipherSuitesPolicyPal.Linux.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Unix.cs" />
@@ -449,6 +455,26 @@
     <Compile Include="System\Net\Security\CipherSuitesPolicyPal.OSX.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(UseWasiCrypto)' == 'true'">
+    <Compile Include="System\Net\Security\SslStream.IO.Wasi.cs" />
+    <Compile Include="System\Net\Security\CipherSuitesPolicyPal.Wasi.cs" />
+    <Compile Include="System\Net\CertificateValidationPal.Wasi.cs" />
+    <Compile Include="System\Net\Security\SslStreamCertificateContext.Wasi.cs" />
+    <Compile Include="System\Net\Security\SslStreamPal.Wasi.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\SafeDeleteSslContext.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Wasi.cs" />
+    <Compile Include="System\Net\Security\StreamSizes.Wasi.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTls.cs"/>
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.ErrorInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IError.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IPoll.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.IStreams.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.PollInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.io.v0_2_0.StreamsInterop.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.ITls.cs" />
+    <Compile Include="System\Net\Security\Pal.Wasi\WasiTlsWorld.wit.imports.wasi.sockets.v0_2_0.TlsInterop.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
@@ -468,6 +494,8 @@
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.ThreadPool" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.IO" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformIdentifier)' != 'windows'">
