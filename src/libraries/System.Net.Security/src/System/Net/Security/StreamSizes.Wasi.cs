@@ -5,7 +5,6 @@ namespace System.Net
 {
     internal partial struct StreamSizes
     {
-        // TODO: what is appropriate for wasi?  does it care?
         public static StreamSizes Default => new StreamSizes { MaximumMessage = 32 * 1024 };
     }
 }

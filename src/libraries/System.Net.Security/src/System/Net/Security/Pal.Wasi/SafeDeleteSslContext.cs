@@ -108,6 +108,7 @@ namespace System.Net
 
         protected override void Dispose(bool disposing)
         {
+            clientConnection?.Dispose();
             innerStream.Dispose();
             tlsStream?.Dispose();
         }

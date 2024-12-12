@@ -22,10 +22,10 @@ namespace System.Net.Security
         private readonly SslAuthenticationOptions _sslAuthenticationOptions = new SslAuthenticationOptions();
         private SafeDeleteSslContext? _securityContext;
 
-        private  async ValueTask<int> ReadAsyncInternal<TIOAdapter>(Memory<byte> buffer, CancellationToken cancellationToken)
+        private async ValueTask<int> ReadAsyncInternal<TIOAdapter>(Memory<byte> buffer, CancellationToken cancellationToken)
             where TIOAdapter : IReadWriteAdapter
         {
-          return await _securityContext!.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            return await _securityContext!.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
         }
 
         private async ValueTask WriteSingleChunk<TIOAdapter>(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
@@ -47,13 +47,15 @@ namespace System.Net.Security
                 }
             }
 
-            if (IsServer) {
+            if (IsServer)
+            {
                 // Server authentication is not currently implemented
                 throw new NotSupportedException("Server Authentication is not implemented");
             }
             _securityContext = new SafeDeleteSslContext(_sslAuthenticationOptions, InnerStream);
 
-            try{
+            try
+            {
                 await _securityContext.AuthenticateAsync().ConfigureAwait(false);
                 CompleteHandshake(_sslAuthenticationOptions);
             }
@@ -77,12 +79,12 @@ namespace System.Net.Security
                                                                     KeyExchangeStrength);
 #pragma warning restore SYSLIB0058 // Use NegotiatedCipherSuite.
         }
-        private static  Task RenegotiateAsync<AsyncReadWriteAdapter>(CancellationToken cancellationToken) => throw new PlatformNotSupportedException();
+        private static Task RenegotiateAsync<AsyncReadWriteAdapter>(CancellationToken cancellationToken) => throw new PlatformNotSupportedException();
 
         internal static X509Certificate2? FindCertificateWithPrivateKey(object instance, bool isServer, X509Certificate certificate)
         {
             // We might be able to do this?
-             throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException();
         }
 
         private static ProtocolToken GenerateToken(ReadOnlySpan<byte> _, out int consumed)
@@ -91,7 +93,7 @@ namespace System.Net.Security
             consumed = 0;
             ProtocolToken token = default;
             token.RentBuffer = false;
-            token.Status = new SecurityStatusPal(SecurityStatusPalErrorCode.OK);;
+            token.Status = new SecurityStatusPal(SecurityStatusPalErrorCode.OK); ;
             return token;
         }
 
@@ -110,6 +112,8 @@ namespace System.Net.Security
                 _remoteCertificate?.Dispose();
                 _remoteCertificate = null;
             }
+
+            _securityContext?.Dispose();
         }
         private static ProtocolToken GenerateAlertToken()
         {

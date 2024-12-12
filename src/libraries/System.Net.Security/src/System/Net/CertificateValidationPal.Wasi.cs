@@ -34,8 +34,8 @@ namespace System.Net
         private static X509Certificate2? GetRemoteCertificate(
             SafeDeleteContext? securityContext,
             bool retrieveChainCertificates,
-            ref X509Chain? _,
-            X509ChainPolicy? __)
+            ref X509Chain? chain,
+            X509ChainPolicy? chainPolicy)
         {
             var sslContext = ((SafeDeleteSslContext?)securityContext);
             if (sslContext == null || sslContext.ClientConnection == null)
@@ -49,11 +49,19 @@ namespace System.Net
             if (remoteCertChain.Count == 0) {
                 return null;
             }
-            var cert =  X509CertificateLoader.LoadCertificate(remoteCertChain.First().ToArray());
+            var cert =  X509CertificateLoader.LoadCertificate(remoteCertChain.First().AsSpan());
             if (retrieveChainCertificates) {
-                Console.WriteLine("WARNING: not implemented");
+                // requires git = "https://github.com/jsturtevant/rust-native-tls.git", branch="cert-chain" in host impl
                 // requires some changes in rust-native-tls
-                //throw new NotSupportedException("todo: certchain implemented on wasi");
+                chain ??= new X509Chain();
+                if (chainPolicy != null)
+                {
+                    chain.ChainPolicy = chainPolicy;
+                }
+                foreach (var certInChain in remoteCertChain)
+                {
+                    chain.ChainPolicy.ExtraStore.Add(X509CertificateLoader.LoadCertificate(certInChain.AsSpan()));
+                }
             }
             return cert;
         }
@@ -64,9 +72,6 @@ namespace System.Net
             throw new NotImplementedException(nameof(IsLocalCertificateUsed));
         }
 
-        //
-        // Used only by client SSL code, never returns null.
-        //
         internal static string[] GetRequestCertificateAuthorities(SafeDeleteContext securityContext)
         {
             throw new NotImplementedException(nameof(GetRequestCertificateAuthorities));

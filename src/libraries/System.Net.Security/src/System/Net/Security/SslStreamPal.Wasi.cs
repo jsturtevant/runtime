@@ -37,8 +37,7 @@ namespace System.Net.Security
             SafeDeleteContext securityContext,
             ChannelBindingKind attribute)
         {
-            // todo call finish handshake
-            throw new PlatformNotSupportedException("TODO");
+            throw new PlatformNotSupportedException(nameof(QueryContextChannelBinding));
         }
 
         public static void QueryContextStreamSizes(
@@ -75,13 +74,12 @@ namespace System.Net.Security
         public static SecurityStatusPal ApplyShutdownToken(
             SafeDeleteSslContext securityContext)
         {
-            // not specified yet
-            throw new PlatformNotSupportedException("TODO");
+             return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
         }
 
         public static SafeFreeCredentials? AcquireCredentialsHandle(SslAuthenticationOptions _1, bool _2)
         {
-            return null;
+            throw new PlatformNotSupportedException(nameof(AcquireCredentialsHandle));
         }
     }
 }

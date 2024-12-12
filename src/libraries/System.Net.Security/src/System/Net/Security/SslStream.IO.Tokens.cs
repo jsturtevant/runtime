@@ -29,6 +29,14 @@ namespace System.Net.Security
 
         private const int UnknownTlsFrameLength = int.MaxValue;              // frame too short to determine length
 
+        // FrameOverhead = 5 byte header + HMAC trailer + padding (if block cipher)
+        // HMAC: 32 bytes for SHA-256 or 20 bytes for SHA-1 or 16 bytes for the MD5
+        private const int FrameOverhead = 64;
+
+        private const int InitialHandshakeBufferSize = 4096 + FrameOverhead; // try to fit at least 4K ServerCertificate
+
+        private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
+
         private bool _receivedEOF;
 
         private ProtocolToken EncryptData(ReadOnlyMemory<byte> buffer)
